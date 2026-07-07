@@ -36,4 +36,4 @@ include(":core:model")
 include(":core:data")
 include(":core:brain")
 include(":core:ui")
-// Added in later M0 commits: :app.
+include(":app")

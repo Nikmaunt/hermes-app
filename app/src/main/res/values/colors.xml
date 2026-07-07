@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Launcher background and the pre-first-frame window background (kept close to the
+         Compose theme's background so there is no colour jump on cold start). -->
+    <color name="ic_launcher_background">#0B57D0</color>
+    <color name="window_background">#F7F8FA</color>
+</resources>

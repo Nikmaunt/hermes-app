@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- A simple "H" mark kept inside the adaptive-icon safe zone (centre 66dp). -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M40,34 h6 v17 h16 v-17 h6 v40 h-6 v-17 h-16 v17 h-6 z" />
+</vector>

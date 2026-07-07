@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TLS only, system trust anchors only (no user-installed CAs => resists MITM via a
+  planted certificate). Cleartext is forbidden in M0 AND M1 (D32): a self-hosted http
+  endpoint is the user's problem to solve with TLS (tailscale serve / a reverse proxy),
+  NOT by loosening this file. If M1 ever truly needs it, the only allowance is a narrow
+  domain-config for ONE explicit user host behind a UI warning — never global, never a
+  user CA.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

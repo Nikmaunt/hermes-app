@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Both surfaces excluded across every domain: nothing is written to cloud backup and
+  nothing is copied during a device-to-device transfer. minSdk 31 is what lets this
+  single file carry the whole backup posture (dataExtractionRules is API 31+); dropping
+  minSdk below 31 would require re-adding the legacy fullBackupContent (D32).
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude domain="root" />
+        <exclude domain="file" />
+        <exclude domain="database" />
+        <exclude domain="sharedpref" />
+        <exclude domain="external" />
+    </device-transfer>
+</data-extraction-rules>
