@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hermes</string>
+
+    <!-- Нижняя навигация -->
+    <string name="nav_today">Сегодня</string>
+    <string name="nav_inbox">Входящие</string>
+    <string name="nav_capture">Запись</string>
+    <string name="nav_chat">Чат</string>
+    <string name="nav_more">Ещё</string>
+
+    <!-- Заголовки экранов -->
+    <string name="title_today">Сегодня</string>
+    <string name="title_inbox">Входящие</string>
+    <string name="title_capture">Новая запись</string>
+    <string name="title_chat">Чат</string>
+    <string name="title_more">Ещё</string>
+    <string name="title_memory">Память</string>
+    <string name="title_documents">Документы</string>
+    <string name="title_money">Финансы</string>
+    <string name="title_habits">Привычки</string>
+    <string name="title_projects">Проекты</string>
+    <string name="title_people">Люди</string>
+    <string name="title_briefs">Сводки</string>
+    <string name="title_settings">Настройки</string>
+
+    <!-- Экраны-заглушки -->
+    <string name="placeholder_title">Скоро</string>
+    <string name="placeholder_body">Этот экран наполнится на следующих этапах.</string>
+
+    <!-- Онбординг -->
+    <string name="onboarding_title">Выберите, как думает Hermes</string>
+    <string name="onboarding_subtitle">Это можно изменить позже в настройках.</string>
+    <string name="onboarding_path_api_key">Использовать API-ключ</string>
+    <string name="onboarding_path_on_device">ИИ на устройстве</string>
+    <string name="onboarding_path_demo">Посмотреть демо</string>
+    <string name="onboarding_checking">Проверяем доступность на устройстве…</string>
+    <string name="onboarding_unavailable_title">ИИ на устройстве недоступен</string>
+    <string name="onboarding_unavailable_body">Этот телефон пока не может запускать ИИ на устройстве. Выберите другой способ.</string>
+    <string name="onboarding_use_api_key">Использовать API-ключ</string>
+    <string name="onboarding_try_demo">Открыть демо</string>
+    <string name="onboarding_back">Назад</string>
+
+    <!-- Настройки -->
+    <string name="settings_theme">Тема</string>
+    <string name="theme_system">Системная</string>
+    <string name="theme_light">Светлая</string>
+    <string name="theme_dark">Тёмная</string>
+    <string name="settings_provider">Провайдер ИИ</string>
+    <string name="settings_change_provider">Сменить провайдера ИИ</string>
+    <string name="provider_api_key">API-ключ</string>
+    <string name="provider_on_device">На устройстве</string>
+    <string name="provider_demo">Демо</string>
+    <string name="provider_none">Не выбран</string>
 </resources>

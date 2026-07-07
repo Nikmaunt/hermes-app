@@ -1,4 +1,55 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Hermes</string>
+
+    <!-- Bottom navigation -->
+    <string name="nav_today">Today</string>
+    <string name="nav_inbox">Inbox</string>
+    <string name="nav_capture">Capture</string>
+    <string name="nav_chat">Chat</string>
+    <string name="nav_more">More</string>
+
+    <!-- Screen titles -->
+    <string name="title_today">Today</string>
+    <string name="title_inbox">Inbox</string>
+    <string name="title_capture">Capture</string>
+    <string name="title_chat">Chat</string>
+    <string name="title_more">More</string>
+    <string name="title_memory">Memory</string>
+    <string name="title_documents">Documents</string>
+    <string name="title_money">Money</string>
+    <string name="title_habits">Habits</string>
+    <string name="title_projects">Projects</string>
+    <string name="title_people">People</string>
+    <string name="title_briefs">Briefs</string>
+    <string name="title_settings">Settings</string>
+
+    <!-- Placeholder screens -->
+    <string name="placeholder_title">Coming soon</string>
+    <string name="placeholder_body">This screen fills in as later milestones land.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title">Choose how Hermes thinks</string>
+    <string name="onboarding_subtitle">You can change this later in Settings.</string>
+    <string name="onboarding_path_api_key">Use an API key</string>
+    <string name="onboarding_path_on_device">On-device AI</string>
+    <string name="onboarding_path_demo">Explore the demo</string>
+    <string name="onboarding_checking">Checking on-device availability…</string>
+    <string name="onboarding_unavailable_title">On-device AI isn\'t available</string>
+    <string name="onboarding_unavailable_body">This phone can\'t run on-device AI yet. Pick another way to continue.</string>
+    <string name="onboarding_use_api_key">Use an API key instead</string>
+    <string name="onboarding_try_demo">Try the demo instead</string>
+    <string name="onboarding_back">Back</string>
+
+    <!-- Settings -->
+    <string name="settings_theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_provider">AI provider</string>
+    <string name="settings_change_provider">Change AI provider</string>
+    <string name="provider_api_key">API key</string>
+    <string name="provider_on_device">On-device</string>
+    <string name="provider_demo">Demo</string>
+    <string name="provider_none">Not set</string>
 </resources>

@@ -4,39 +4,42 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.activity.viewModels
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.hermes.core.ui.theme.HermesTheme
+import app.hermes.data.ThemeMode
+import app.hermes.navigation.HermesAppRoot
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
- * The single activity. In this first :app commit it only boots the theme; the navigation
- * graph, onboarding gate and screens land in the next commit.
+ * The single activity. It waits for the first settings emission, then applies the theme
+ * and hands off to the navigation root, whose start destination is the onboarding gate.
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            HermesTheme {
-                Placeholder()
+            val settings by viewModel.settings.collectAsStateWithLifecycle()
+            settings?.let { current ->
+                HermesTheme(darkTheme = current.theme.isDark()) {
+                    HermesAppRoot(startOnboarded = current.onboardingComplete)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun Placeholder() {
-    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            Text(text = "Hermes", style = MaterialTheme.typography.headlineSmall)
-        }
-    }
+private fun ThemeMode.isDark(): Boolean = when (this) {
+    ThemeMode.SYSTEM -> isSystemInDarkTheme()
+    ThemeMode.LIGHT -> false
+    ThemeMode.DARK -> true
 }

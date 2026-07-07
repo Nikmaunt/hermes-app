@@ -270,3 +270,54 @@ Compose forced two shared-config exceptions, applied once at the repo root: dete
 `FunctionNaming.ignoreAnnotated: ['Composable']` and ktlint
 `ktlint_function_naming_ignore_when_annotated_with = Composable` — `@Composable`
 functions are PascalCase by convention.
+
+---
+
+## M0 — `:app` (shell, security, onboarding, navigation)
+
+### D32. The security posture ships in the first `:app` commit and is never loosened by inertia
+`allowBackup=false` + `dataExtractionRules` with cloud-backup AND device-transfer both
+excluded across every domain (root/file/database/sharedpref/external) → private data
+never leaves the device via backup or phone-to-phone transfer. This whole posture rests
+on **minSdk 31** (`dataExtractionRules` is API 31+); dropping minSdk below 31 would force
+re-adding the legacy `fullBackupContent`. `usesCleartextTraffic=false` +
+`network_security_config` = **TLS only, system trust anchors only** (no user CA →
+resists MITM via a planted cert). **Cleartext stays forbidden in M0 AND M1**: a
+self-hosted `http://` endpoint is the user's to fix with TLS (tailscale serve / a reverse
+proxy), NOT by loosening the config; if M1 ever truly needs it, the ONLY allowance is a
+narrow `domain-config` for one explicit user host behind a UI warning — never global,
+never a user CA. Only one exported component today (the launcher activity); every future
+exported surface (share target M2, notification listener M8) is added under its OWN
+audit, not by inertia.
+
+### D33. Bottom nav is four tabs + a centre capture; the Lens layout is deliberately dropped
+`[Today] [Inbox] (+) [Chat] [More]`. Lens used a sidecar and was a thin viewer of its
+read-models, so its nav followed data surfaces (Today/Inbox/+/Briefs/More). `:app` is the
+full local app, so nav follows the user's daily loop — capture → review (Inbox) →
+agenda (Today) → ask (Chat). Briefs leaves the root (Today *is* the day's brief; brief
+history lives under More) and **Chat is promoted** (the on-device/API brain is
+first-class here, not a proxied secondary). **Capture has two entry points by contract**:
+the centre `[+]` today and an external share intent in M2. It is therefore a standalone
+top-level destination (not nested under a tab), so back returns cleanly from both and the
+future share entry cannot break its navigation. Secondary screens (Memory, Documents,
+Money, Habits, Projects, People, Briefs, Settings) hang under More. 13 screens total.
+
+### D34. Onboarding is a pure reducer; the on-device branch is never a dead end
+`OnboardingReducer.reduce(state, event)` is pure and total (unknown pairs are a no-op),
+unit-tested on the JVM. On-device availability arrives as an EVENT
+(`OnDeviceChecked`), not read inside the reducer — the async ML Kit GenAI probe lives in
+the ViewModel (M1; the M0 probe returns UNAVAILABLE). Choosing on-device when it is
+unavailable lands in `OnDeviceUnavailable`, which offers three exits (API key / Demo /
+Back) and never locks. The ONLY write is `SettingsRepository.completeOnboarding` at the
+terminal `Ready` state, and it only ever sets `onboarding_complete` **true** — so
+changing the provider later from Settings re-runs the same reducer without resetting the
+flag, and a cancelled re-entry (backed out before a choice) writes nothing and preserves
+the prior provider. `onboarding_complete` is reset only by an explicit data wipe (M7).
+
+### D35. DataStore holds only non-secret settings; secrets go to the Keystore (M1)
+Preferences DataStore stores `theme` (ThemeMode), `provider` (ProviderChoice, null until
+chosen), `onboarding_complete` (Boolean), `base_url` (non-secret endpoint part) and
+`output_language` (String?, null = system locale; feeds `BrainContext.language`, its UI
+is M3). Enums persist as their wire value and an unknown one degrades to the default on
+read. The API key and any tokens NEVER touch this store — they live in the
+Keystore/EncryptedSharedPreferences store built in M1.

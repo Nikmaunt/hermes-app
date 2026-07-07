@@ -17,6 +17,10 @@ style:
     maxLineLength: 120
 
 complexity:
+  CyclomaticComplexMethod:
+    # A flat `when` that maps N inputs to N outputs (route->title, state-machine
+    # reducers) is not "complex" — don't count each simple arm.
+    ignoreSimpleWhenEntries: true
   TooManyFunctions:
     active: false          # DAOs and enum groupings legitimately have many members
   LongParameterList:
