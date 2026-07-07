@@ -140,3 +140,89 @@ explicit Migration list. A JVM test opens the real DB and round-trips; a
 MigrationTestHelper scaffold will validate upgrades in M1+. v1 has nothing to
 migrate from, but the harness exists so adding a column later cannot skip a
 migration test.
+
+---
+
+## M0 — `:core:brain` (extraction & chat contract)
+
+### D18. `:core:brain` is a thin transport + provider-agnostic services; validation is written ONCE
+`BrainProvider` is only the transport — given messages it returns raw text + token
+usage, and knows nothing about prompts, validation, or retries. The chat and
+extraction use-cases (`ChatService`, `ExtractionService`) sit ABOVE it and are the
+sole home of prompt-building, decode, validation and retry. Fake/OpenRouter/on-device
+each implement only `complete()`. Two consequences: (1) a `FakeProvider`'s raw output
+flows through the SAME `ExtractionValidator` as a real provider, so demo fixtures are
+the genuine product of the pipeline, not a bypass; (2) `:core:brain` depends only on
+`:core:model`, NEVER `:core:data` — it knows the semantic model, and mapping
+`Extracted*` → Room entities (stamping id/createdAt/sourceNoteId/dedupKey) is the M2
+data layer's job. Rejected a single fat `BrainProvider.chat()+extract()` interface: it
+would duplicate validation per provider and couple providers to policy. Pure
+`kotlin("jvm")` (does not apply AGP) is the structural check that the contract stays
+Android-free (§5); the on-device ML Kit GenAI provider arrives in M1 behind this
+contract with its Android code in `:app`.
+
+### D19. The extraction boundary is STRICT — the deliberate opposite of D12
+LLM output is untrusted. `ExtractionValidator` HARD-rejects an unknown *filtering*
+enum (`MemoryCategory`, `DocumentKind`), an unparseable/out-of-window date, and money
+with an amount but no currency. This is deliberately the opposite of the storage-read
+degrade policy (D12): there the DB is the only source, so an unknown value degrades to
+keep the row; here the input is untrusted, so we reject rather than silently mis-file.
+*Soft* optional enums with a natural default (`Criticality`→NORMAL, `ProjectStatus`→
+ACTIVE, `HabitCadence`→DAILY, `BillingPeriod`→MONTHLY) degrade to the default WITH a
+warning — degraded, but never silently. Granularity is a hybrid: a structural/JSON
+failure triggers one hardened retry; an element-level hard violation drops only that
+item. Nothing is lost silently — a dropped item is preserved as a `RejectedItem` (its
+exact raw fragment + the violations) and a degrade/default as a `warning`; both ride in
+`ExtractionResult` for the M2 review UI.
+
+### D20. The model never emits ids/timestamps/`sourceNoteId`/`dedupKey`; dates are ISO, resolved against injected context
+`Extracted*` items carry only semantic fields. Row `id`, `createdAt`, `sourceNoteId`
+and `dedupKey` are stamped at persist (M2), so the model cannot forge provenance or
+break idempotency. The model emits dates as ISO local strings (`{date:"YYYY-MM-DD"}` or
+`{dateTime:"YYYY-MM-DDTHH:MM"}`) and resolves relative dates against `BrainContext`
+(now, zone) — no epoch-millis from the model (LLMs are bad at them), no NL date parsing
+in Kotlin. Timed → a true instant in the zone; date-only → CalendarDates UTC-midnight
+millis (D6).
+
+### D21. A dateless followup is rejected at the extraction boundary
+`followups.dueAt` is required and NEVER defaulted. A "followup" the model returns
+without a resolvable date is a hard violation (`MISSING_DUE_DATE`) → rejected for
+review, never stored dateless and never redirected into a dated `memory_fact`. This
+enforces D8 at the untrusted boundary; `dueIsDateOnly` carries the date-only/timed
+distinction. (Contrast D23: `occurredAt`/`decidedAt` DO default to now — those columns
+are not alarm-bearing.)
+
+### D22. Extraction/chat context is injected → deterministic, unit-testable
+`BrainContext(nowMillis, zoneId, language)` is supplied by the caller; nothing in
+`:core:brain` reads the wall clock or the device zone. `language` is the preferred
+OUTPUT language (summary/brief/chat) — the input note's language is the model's to
+detect, never language-detected in Kotlin. `FakeProvider` is deterministic (a handler
+over request + call-index, no clock/random), serving both unit tests and Demo mode.
+
+### D23. `occurredAt`/`decidedAt` default to now; numeric/date bounds guard a runaway model
+Absent `occurredAt` (transactions) / `decidedAt` (decisions) default to `context.now`
+WITH a warning — an optional field must not cost a valid row; a present-but-unparseable
+value is a hard violation (garbage is a strong signal, absence is not). Bumpers on
+untrusted output: list sizes are capped per type (warning on overflow, never silent),
+amounts beyond a sanity bound and dates outside now ± 100y are rejected.
+
+### D24. `source` is a system field, not an extracted one
+The `*_source` enums (`TransactionSource`: manual/notification/gmail/import, …) record
+HOW a row entered the app — which the model cannot know. So `ExtractedTransaction` has
+no `source`; the persistence layer stamps it, exactly like `id`/`createdAt`. Dropping
+it from the contract stops the model inventing provenance.
+
+### D25. Over-budget input is an explicit outcome, never a silent truncation
+A note longer than the provider input budget returns
+`ExtractionOutcome.TooLarge(noteChars, limitChars)` WITHOUT calling the model. We never
+truncate to fit — half of a shared PDF would be lost without a trace. Chunking is
+deferred (M1+); the honest outcome exists in the contract from day one.
+
+### D26. Chat context is shaped for M5 retrieval without coupling brain to `:core:data`
+`ChatContext` carries `brain` + `retrievedFacts` + `recentFollowups` as plain
+read-models. M5 fills them from the data layer and passes them in; `ChatService.reply(
+history, context)` keeps its signature and `:core:brain` never gains a `:core:data`
+dependency (D18). Idempotency of a re-run extraction is likewise NOT brain's job — it is
+the persistence layer's, via `transactions.dedupKey` and the followups
+`(sourceNoteId, dueAt)` repo dedup check (D15); brain only runs extraction at
+temperature 0 to *tend* toward reproducibility.
