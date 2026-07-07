@@ -1,0 +1,22 @@
+# --- Gradle ---
+.gradle/
+**/build/
+!build-logic/**/src/**
+# --- Android / IDE local config (never commit machine paths or SDK location) ---
+local.properties
+.idea/
+*.iml
+captures/
+.cxx/
+# --- Secrets & keys: nothing sensitive ever enters VCS ---
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+# --- OS noise ---
+.DS_Store
+Thumbs.db
+# --- Build outputs / logs ---
+*.apk
+*.aab
+*.log
