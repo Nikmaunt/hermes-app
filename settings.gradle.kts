@@ -35,4 +35,5 @@ rootProject.name = "hermes-app"
 include(":core:model")
 include(":core:data")
 include(":core:brain")
-// Added in later M0 commits: :core:ui, :app.
+include(":core:ui")
+// Added in later M0 commits: :app.

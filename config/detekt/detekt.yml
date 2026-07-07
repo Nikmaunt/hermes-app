@@ -27,3 +27,6 @@ complexity:
 naming:
   EnumNaming:
     enumEntryPattern: '[A-Z][_A-Z0-9]*'
+  FunctionNaming:
+    # Jetpack Compose @Composable functions are PascalCase by convention.
+    ignoreAnnotated: ['Composable']

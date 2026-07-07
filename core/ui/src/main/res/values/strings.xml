@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Built-in text for shared UI primitives. Callers may override via parameters;
+         feature strings live in their own modules. -->
+    <string name="hermes_sensitive_reveal_hint">Tap to reveal</string>
+</resources>

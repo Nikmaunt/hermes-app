@@ -226,3 +226,47 @@ dependency (D18). Idempotency of a re-run extraction is likewise NOT brain's job
 the persistence layer's, via `transactions.dedupKey` and the followups
 `(sourceNoteId, dueAt)` repo dedup check (D15); brain only runs extraction at
 temperature 0 to *tend* toward reproducibility.
+
+---
+
+## M0 — `:core:ui` (theme, tokens, primitives)
+
+### D27. The colour palette is plain ARGB longs — one source of truth for theme AND test
+`ColorTokens` holds each semantic role as a `0xAARRGGBB` `Long`, NOT a Compose `Color`.
+The Compose theme wraps them in `Color(...)` at the edge; the WCAG contrast test reads
+the SAME longs. Because the palette carries no Compose/Android types, that test runs as a
+fast JVM unit test (no device, no Robolectric). Rejected defining the palette directly as
+Compose `Color`s: `Color.toArgb()` in a plain JVM test is unreliable, and it would split
+the source of truth between theme and test.
+
+### D28. Contrast is guarded by a token test, not by eyeballs
+`ColorTokenContrastTest` computes WCAG contrast straight from `HermesPalette` and asserts
+every body-text pair ≥ 4.5:1 and every accent/border/control pair ≥ 3:1, in BOTH themes.
+A palette edit that dims a role below threshold fails `./gradlew check`. This is the one
+part of the UI layer that gets a test instead of a screenshot — contrast is objective
+(the Lens regression: a light "raised" surface silently fell to 2.98:1 and only a token
+test caught it; verified here by temporarily dimming a role and watching the test go red).
+
+### D29. Sensitive-masking is a shared primitive with a HOISTED reveal — the biometric seam
+`SensitiveContent` (blur + tap-to-reveal) lives in the primitive set beside Screen/
+empty-state/skeleton, so Memory/Documents/Search never grow three different maskings. The
+reveal decision is hoisted: the stateless overload takes `revealed` + `onRevealRequest`,
+and `onRevealRequest` is exactly where M3 gates a biometric prompt (reveal only on
+success). The primitive never authenticates and never persists the revealed flag (the
+self-managed overload re-hides on recomposition) — that policy is the security layer's.
+
+### D30. Skeletons are shaped to the layout they replace, not grey rectangles
+Loading placeholders are composed from the same rows/columns as the real card
+(`HermesCardSkeleton` is the exemplar: avatar + title + two body lines + meta), sharing
+ONE shimmer brush from `rememberShimmerBrush()` so the whole card shimmers in sync. Lens
+lesson: a single jumping grey block reads worse than a spinner. Feature screens copy the
+pattern for their own cards.
+
+### D31. Non-M3 roles ride a CompositionLocal; Compose PascalCase is allowed in shared lint config
+Roles Material 3's `ColorScheme` has no slot for (`surfaceRaised`, `controlTrack`,
+`controlThumb`) are exposed via `LocalHermesColors` and read as `HermesTheme.colors`,
+staying in lock-step with `ColorTokens` so the contrast test still governs them. Enabling
+Compose forced two shared-config exceptions, applied once at the repo root: detekt
+`FunctionNaming.ignoreAnnotated: ['Composable']` and ktlint
+`ktlint_function_naming_ignore_when_annotated_with = Composable` — `@Composable`
+functions are PascalCase by convention.
