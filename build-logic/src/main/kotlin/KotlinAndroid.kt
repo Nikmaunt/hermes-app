@@ -25,6 +25,12 @@ internal fun Project.configureKotlinAndroid(
             sourceCompatibility = JavaVersion.VERSION_17
             targetCompatibility = JavaVersion.VERSION_17
         }
+
+        testOptions {
+            // Robolectric-based DAO/migration tests run on the JVM under `check`.
+            unitTests.isIncludeAndroidResources = true
+            unitTests.isReturnDefaultValues = true
+        }
     }
 
     extensions.configure<KotlinAndroidProjectExtension> {

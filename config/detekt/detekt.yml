@@ -1,0 +1,29 @@
+# Detekt config for hermes-app. buildUponDefaultConfig=true, so this only
+# overrides. Kept pragmatic for a young codebase: the noisiest opinion rules
+# are relaxed, real-signal rules (complexity, potential-bugs, coroutines) stay on.
+
+build:
+  maxIssues: 0
+
+style:
+  MagicNumber:
+    active: false          # epoch math, hex formatting, ISO-4217 length etc.
+  ReturnCount:
+    active: true
+    max: 4
+  UnusedPrivateMember:
+    active: true
+  MaxLineLength:
+    maxLineLength: 120
+
+complexity:
+  TooManyFunctions:
+    active: false          # DAOs and enum groupings legitimately have many members
+  LongParameterList:
+    active: true
+    functionThreshold: 8
+    constructorThreshold: 16   # Room entities mirror table columns
+
+naming:
+  EnumNaming:
+    enumEntryPattern: '[A-Z][_A-Z0-9]*'

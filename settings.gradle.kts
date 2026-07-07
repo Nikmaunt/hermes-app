@@ -32,5 +32,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "hermes-app"
 
-// Modules are added in the next commit (M0 step 2): :app, :core:model,
-// :core:brain, :core:data, :core:ui.
+include(":core:model")
+include(":core:data")
+// Added in later M0 commits: :core:brain, :core:ui, :app.
