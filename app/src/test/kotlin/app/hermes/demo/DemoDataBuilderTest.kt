@@ -31,9 +31,22 @@ class DemoDataBuilderTest {
     }
 
     @Test
+    fun `dates are resolved relative to now - appointment ahead, renewal ahead, decision past`() = runTest {
+        val data = build() // uses the fixed test clock
+        val followup = data.followups.single()
+        val document = data.documents.single()
+        val decision = data.decisions.single()
+        // The appointment and the renewal are in the future of "now"; the decision is past —
+        // so a Demo seeded at the wall clock is always fresh, never showing a past-due date.
+        assertThat(followup.dueAt).isGreaterThan(DemoNotes.TEST_NOW_MILLIS)
+        assertThat(document.renewsOn!!).isGreaterThan(DemoNotes.TEST_NOW_MILLIS)
+        assertThat(decision.decidedAt).isLessThan(DemoNotes.TEST_NOW_MILLIS)
+    }
+
+    @Test
     fun `the medical note births a dated followup AND a dateless sensitive fact from one text (D8 D21)`() = runTest {
         val data = build()
-        val note = data.notes.first { it.text == DemoNotes.MEDICAL.text }
+        val note = data.notes.first { it.text == DemoNotes.MEDICAL_TEXT }
 
         val followups = data.followups.filter { it.sourceNoteId == note.id }
         val facts = data.memoryFacts.filter { it.sourceNoteId == note.id }
@@ -71,7 +84,7 @@ class DemoDataBuilderTest {
     @Test
     fun `the person note yields a person and a relationships fact`() = runTest {
         val data = build()
-        val note = data.notes.first { it.text == DemoNotes.PERSON.text }
+        val note = data.notes.first { it.text == DemoNotes.PERSON_TEXT }
         val person = data.people.single()
         assertThat(person.name).isEqualTo("Rosa")
         assertThat(person.preferredLanguage).isEqualTo("es")

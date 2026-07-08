@@ -335,12 +335,10 @@ So the demo database is what the pipeline *produced* from those notes, provenanc
 `sourceNoteId`, never a bypass. The corpus is chosen to make the design visible in the
 running app: the **medical** note alone births BOTH a dated followup AND a *dateless*,
 *sensitive* health `memory_fact` from one text — D8/D21 made visible — and that sensitive
-fact is the material `SensitiveContent` masks (D29, biometric seam in M3). **Determinism
-tradeoff:** the pipeline resolves against a FIXED `BrainContext.now` and the JSON carries
-absolute dates, so the seeded rows are byte-for-byte reproducible (and the pipeline test can
-assert on them). The cost is that demo dates are fixed, not relative to the real "today" — a
-documented simplification a later milestone can lift by computing dates from the seed-time
-clock.
+fact is the material `SensitiveContent` masks (D29, biometric seam in M3). **Determinism vs
+freshness:** the pipeline test pins a FIXED `BrainContext.now` (`DemoNotes.TEST_NOW_MILLIS`)
+so its rows are byte-for-byte reproducible and assertable; the running *seeder* resolves
+against the wall clock so demo dates never go stale — see D39.
 
 ### D37. The Extracted*→Room mapping Demo needs is a DEMO-SCOPED preview of M2, kept in `:app`
 Mapping `Extracted*` items to Room rows — stamping the `id`/`createdAt`/`sourceNoteId`/
@@ -367,3 +365,17 @@ Room DB via Hilt and therefore gains `room-runtime`/`room-ktx`; `:core:model` an
 `MainViewModel` when onboarding completes with the Demo provider, and is idempotent by
 construction (note-count guard + `Mutex`, one `withTransaction`) so re-entering Demo never
 double-seeds.
+
+### D39. Demo dates are seeded relative to the wall clock; the pipeline test pins a fixed clock
+A showcase must never show a past-due appointment — that reads as an app bug. So `DemoNotes.
+corpus(now)` resolves every date as an offset from `now` (appointment = today + 7d,
+subscription renewal = the next 20th, a decision made 2 days ago, a spend just now), and the
+`DemoSeeder` passes `System.currentTimeMillis()` at seed time — Demo is always fresh. The note
+TEXTS stay date-free / relative ("через неделю", "on the 20th") so a capture never contradicts
+the date the pipeline resolves for it — faithful to D20 (the model resolves relative dates
+against the injected `now`; the fixture computes the same way). The wall clock is read ONLY in
+`:app` (`DemoSeeder`) and injected into `BrainContext`; `:core:brain` stays clock-free (D22).
+Determinism is preserved where it matters: `DemoDataBuilder` defaults to a FIXED clock
+(`DemoNotes.TEST_NOW_MILLIS`), so `DemoDataBuilderTest` still asserts exact, reproducible rows
+— now including that the followup and renewal are in the future and the decision in the past,
+which pins the relative-date logic itself. Supersedes the fixed-date note in D36.

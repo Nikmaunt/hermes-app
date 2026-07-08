@@ -20,11 +20,11 @@ class DemoSeeder @Inject constructor(
     private val db: HermesDatabase,
 ) {
     private val mutex = Mutex()
-    private val builder = DemoDataBuilder()
 
     suspend fun seedIfEmpty() = mutex.withLock {
         if (db.noteDao().count() > 0) return@withLock
-        val data = builder.build()
+        // Resolve dates against the wall clock AT SEED TIME so Demo is always fresh (D39).
+        val data = DemoDataBuilder(nowMillis = System.currentTimeMillis()).build()
         db.withTransaction {
             data.notes.forEach { db.noteDao().insert(it) }
             data.memoryFacts.forEach { db.memoryCaptureDao().append(it) }

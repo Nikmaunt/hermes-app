@@ -39,17 +39,21 @@ import java.util.Locale
  * transactions, the dedup key) the model is never allowed to emit (D20/D24). This is a
  * DEMO-SCOPED preview of the mapping the M2 data layer will own for real; it lives in
  * `:app`, not `:core:data`, so it does not freeze the M2 contract early (D18).
+ *
+ * All dates resolve against [nowMillis]: the seeder passes the wall clock so Demo stays
+ * fresh, while this defaults to a FIXED clock so the pipeline test is reproducible (D39).
  */
-class DemoDataBuilder(
-    private val service: ExtractionService = DemoBrain.service(),
-    private val context: BrainContext = DemoBrain.brainContext(),
-    private val notes: List<DemoNote> = DemoNotes.ALL,
-) {
+class DemoDataBuilder(private val nowMillis: Long = DemoNotes.TEST_NOW_MILLIS) {
+
+    private val notes: List<DemoNote> = DemoNotes.corpus(nowMillis)
+    private val context: BrainContext = DemoBrain.brainContext(nowMillis)
+    private val service: ExtractionService = DemoBrain.service(notes)
+
     suspend fun build(): DemoData {
         val acc = DemoAcc()
         notes.forEachIndexed { index, note ->
-            // Deterministic, descending timestamps: index 0 (newest) sits at NOW.
-            val createdAt = DemoNotes.NOW_MILLIS - index.toLong() * CREATED_STEP_MS
+            // Deterministic, descending timestamps: index 0 (newest) sits at now.
+            val createdAt = nowMillis - index.toLong() * CREATED_STEP_MS
             persist(note, createdAt, extract(note), acc)
         }
         return acc.toDemoData()
