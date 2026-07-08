@@ -52,4 +52,12 @@
     <string name="provider_on_device">On-device</string>
     <string name="provider_demo">Demo</string>
     <string name="provider_none">Not set</string>
+
+    <!-- Read screens (populated in Demo) -->
+    <string name="demo_empty_title">Nothing here yet</string>
+    <string name="demo_empty_body">Capture a note and Hermes files what it finds.</string>
+    <string name="money_total">Total</string>
+    <string name="demo_renews">renews %1$s</string>
+    <string name="demo_prefers">prefers %1$s</string>
+    <string name="demo_decision">decided %1$s</string>
 </resources>

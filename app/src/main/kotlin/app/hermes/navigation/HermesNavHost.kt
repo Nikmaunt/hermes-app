@@ -22,9 +22,17 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import app.hermes.onboarding.OnboardingScreen
+import app.hermes.ui.DocumentsScreen
+import app.hermes.ui.HabitsScreen
+import app.hermes.ui.InboxScreen
+import app.hermes.ui.MemoryScreen
+import app.hermes.ui.MoneyScreen
 import app.hermes.ui.MoreScreen
+import app.hermes.ui.PeopleScreen
 import app.hermes.ui.PlaceholderScreen
+import app.hermes.ui.ProjectsScreen
 import app.hermes.ui.SettingsScreen
+import app.hermes.ui.TodayScreen
 
 /**
  * Single-activity root: one [Scaffold] owns the top bar (title + back for non-tab
@@ -116,18 +124,20 @@ private fun HermesNavHost(navController: NavHostController, startDestination: St
                 },
             )
         }
-        composable(Routes.TODAY) { PlaceholderScreen(route = Routes.TODAY) }
-        composable(Routes.INBOX) { PlaceholderScreen(route = Routes.INBOX) }
+        // Screens with a seeded read model in Demo (empty state otherwise).
+        composable(Routes.TODAY) { TodayScreen() }
+        composable(Routes.INBOX) { InboxScreen() }
+        composable(Routes.MEMORY) { MemoryScreen() }
+        composable(Routes.DOCUMENTS) { DocumentsScreen() }
+        composable(Routes.MONEY) { MoneyScreen() }
+        composable(Routes.HABITS) { HabitsScreen() }
+        composable(Routes.PROJECTS) { ProjectsScreen() }
+        composable(Routes.PEOPLE) { PeopleScreen() }
+        // Still stubs — their features arrive later (Capture M2, Chat M5, Briefs M4).
         composable(Routes.CAPTURE) { PlaceholderScreen(route = Routes.CAPTURE) }
         composable(Routes.CHAT) { PlaceholderScreen(route = Routes.CHAT) }
-        composable(Routes.MORE) { MoreScreen(onOpen = { navController.navigate(it) }) }
-        composable(Routes.MEMORY) { PlaceholderScreen(route = Routes.MEMORY) }
-        composable(Routes.DOCUMENTS) { PlaceholderScreen(route = Routes.DOCUMENTS) }
-        composable(Routes.MONEY) { PlaceholderScreen(route = Routes.MONEY) }
-        composable(Routes.HABITS) { PlaceholderScreen(route = Routes.HABITS) }
-        composable(Routes.PROJECTS) { PlaceholderScreen(route = Routes.PROJECTS) }
-        composable(Routes.PEOPLE) { PlaceholderScreen(route = Routes.PEOPLE) }
         composable(Routes.BRIEFS) { PlaceholderScreen(route = Routes.BRIEFS) }
+        composable(Routes.MORE) { MoreScreen(onOpen = { navController.navigate(it) }) }
         composable(Routes.SETTINGS) {
             SettingsScreen(onChangeProvider = { navController.navigate(Routes.ONBOARDING) })
         }

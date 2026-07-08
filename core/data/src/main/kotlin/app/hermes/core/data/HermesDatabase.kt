@@ -5,6 +5,8 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import app.hermes.core.data.dao.DecisionDao
+import app.hermes.core.data.dao.DocumentDao
 import app.hermes.core.data.dao.FollowupDao
 import app.hermes.core.data.dao.HabitDao
 import app.hermes.core.data.dao.MemoryCaptureDao
@@ -12,6 +14,8 @@ import app.hermes.core.data.dao.MemoryConsolidationDao
 import app.hermes.core.data.dao.MemoryForgetDao
 import app.hermes.core.data.dao.MemoryReadDao
 import app.hermes.core.data.dao.NoteDao
+import app.hermes.core.data.dao.PersonDao
+import app.hermes.core.data.dao.ProjectDao
 import app.hermes.core.data.dao.TransactionDao
 import app.hermes.core.data.entity.BriefEntity
 import app.hermes.core.data.entity.ChatMessageEntity
@@ -64,6 +68,10 @@ abstract class HermesDatabase : RoomDatabase() {
     abstract fun followupDao(): FollowupDao
     abstract fun transactionDao(): TransactionDao
     abstract fun habitDao(): HabitDao
+    abstract fun personDao(): PersonDao
+    abstract fun projectDao(): ProjectDao
+    abstract fun decisionDao(): DecisionDao
+    abstract fun documentDao(): DocumentDao
     abstract fun memoryReadDao(): MemoryReadDao
     abstract fun memoryCaptureDao(): MemoryCaptureDao
     abstract fun memoryConsolidationDao(): MemoryConsolidationDao

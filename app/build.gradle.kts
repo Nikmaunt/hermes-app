@@ -38,6 +38,9 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.material.icons.extended)
     implementation(libs.kotlinx.coroutines.android)
+    // :app is the composition root: it builds the Room DB and seeds Demo through it.
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
 
     testImplementation(libs.junit4)
     testImplementation(libs.truth)

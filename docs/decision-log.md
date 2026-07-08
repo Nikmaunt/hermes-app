@@ -321,3 +321,49 @@ chosen), `onboarding_complete` (Boolean), `base_url` (non-secret endpoint part) 
 is M3). Enums persist as their wire value and an unknown one degrades to the default on
 read. The API key and any tokens NEVER touch this store — they live in the
 Keystore/EncryptedSharedPreferences store built in M1.
+
+---
+
+## M0 — Demo fixtures & shell read screens (M0 close)
+
+### D36. Demo data is the genuine product of the extraction pipeline, not hand-filled tables
+Each demo note pairs a natural-language capture (`DemoNote.text`, EN + RU mixed) with the
+RAW JSON a provider would return for it. The seeder feeds that JSON through the SAME
+`FakeProvider` → `ExtractionService` → `ExtractionValidator` a real provider's output flows
+through (D18) — content-matched on the note text, deterministic, clock/random-free (D22).
+So the demo database is what the pipeline *produced* from those notes, provenance-linked by
+`sourceNoteId`, never a bypass. The corpus is chosen to make the design visible in the
+running app: the **medical** note alone births BOTH a dated followup AND a *dateless*,
+*sensitive* health `memory_fact` from one text — D8/D21 made visible — and that sensitive
+fact is the material `SensitiveContent` masks (D29, biometric seam in M3). **Determinism
+tradeoff:** the pipeline resolves against a FIXED `BrainContext.now` and the JSON carries
+absolute dates, so the seeded rows are byte-for-byte reproducible (and the pipeline test can
+assert on them). The cost is that demo dates are fixed, not relative to the real "today" — a
+documented simplification a later milestone can lift by computing dates from the seed-time
+clock.
+
+### D37. The Extracted*→Room mapping Demo needs is a DEMO-SCOPED preview of M2, kept in `:app`
+Mapping `Extracted*` items to Room rows — stamping the `id`/`createdAt`/`sourceNoteId`/
+`dedupKey` the model may never emit (D20/D24) — is the M2 data layer's job (D18). Demo needs
+it now, so `DemoDataBuilder` does it, but lives in `:app` (the composition root that already
+depends on both `:core:brain` and `:core:data`), NOT in `:core:data` — so it does not freeze
+the M2 persist contract early. When M2 lands the real mapping, the builder either delegates
+to it or is replaced. Its shortcuts are explicitly demo-scoped: `projectRef`→`projectId` is
+resolved WITHIN a note (M2 will resolve across all projects), and transactions are stamped
+`source = manual` (a typed note is user-entered, D24). The failing-test-first
+`DemoDataBuilderTest` runs the notes through the real pipeline and asserts the resulting rows
+— the marquee case being the D8/D21 split as two rows sharing one `sourceNoteId`.
+
+### D38. Read screens are minimal DB-backed lists so Demo is not empty; schema stays v1
+The M0 shell screens (Today/Inbox/Memory/Money/Documents/Habits/People/Projects) become thin
+lists that observe their DAO through a `@HiltViewModel`; the SAME screens render the shared
+empty state outside Demo, where the store is legitimately empty until capture exists (M2).
+Enabling this needed access-only DAOs for `people`/`projects`/`decisions`/`documents` (tables
+already present since schema v1) plus `observeAll`/`count` on existing DAOs — **no column,
+index or view changed**, so the exported schema JSON and `HermesDatabase.VERSION` stay v1 and
+the migration harness (D17) is untouched. `:app` becomes the composition root that builds the
+Room DB via Hilt and therefore gains `room-runtime`/`room-ktx`; `:core:model` and
+`:core:brain` remain Android-free (§5) and untouched. The Demo seed is armed once from
+`MainViewModel` when onboarding completes with the Demo provider, and is idempotent by
+construction (note-count guard + `Mutex`, one `withTransaction`) so re-entering Demo never
+double-seeds.

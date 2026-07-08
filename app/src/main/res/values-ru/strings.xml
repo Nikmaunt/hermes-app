@@ -52,4 +52,12 @@
     <string name="provider_on_device">На устройстве</string>
     <string name="provider_demo">Демо</string>
     <string name="provider_none">Не выбран</string>
+
+    <!-- Экраны-списки (наполняются в демо) -->
+    <string name="demo_empty_title">Здесь пока пусто</string>
+    <string name="demo_empty_body">Запишите заметку — Hermes разложит найденное.</string>
+    <string name="money_total">Итого</string>
+    <string name="demo_renews">продление %1$s</string>
+    <string name="demo_prefers">предпочитает %1$s</string>
+    <string name="demo_decision">решено %1$s</string>
 </resources>

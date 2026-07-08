@@ -32,6 +32,14 @@ abstract class NoteDao {
     @Query("SELECT * FROM notes WHERE id = :id")
     abstract suspend fun getById(id: String): NoteEntity?
 
+    /** Inbox feed: every note that has not been discarded, newest first. */
+    @Query("SELECT * FROM notes WHERE status != 'discarded' ORDER BY createdAt DESC")
+    abstract fun observeAll(): Flow<List<NoteEntity>>
+
+    /** Cheap "is the store empty?" probe — backs the idempotent Demo seed guard. */
+    @Query("SELECT COUNT(*) FROM notes")
+    abstract suspend fun count(): Int
+
     @Query(
         """
         SELECT b.* FROM notes b
@@ -53,6 +61,9 @@ interface FollowupDao {
 
     @Query("SELECT * FROM followups WHERE status = 'pending' ORDER BY dueAt ASC")
     fun observePending(): Flow<List<FollowupEntity>>
+
+    @Query("SELECT * FROM followups ORDER BY dueAt ASC")
+    fun observeAll(): Flow<List<FollowupEntity>>
 }
 
 @Dao
@@ -64,6 +75,9 @@ interface TransactionDao {
 
     @Query("SELECT * FROM transactions WHERE dedupKey = :dedupKey LIMIT 1")
     suspend fun findByDedup(dedupKey: String): TransactionEntity?
+
+    @Query("SELECT * FROM transactions ORDER BY occurredAt DESC")
+    fun observeAll(): Flow<List<TransactionEntity>>
 
     @Query("SELECT COUNT(*) FROM transactions")
     suspend fun count(): Int
@@ -77,6 +91,9 @@ interface HabitDao {
     /** IGNORE on UNIQUE(habitId, tickDate) → one tick per day, replay-safe. */
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertTick(tick: HabitTickEntity): Long
+
+    @Query("SELECT * FROM habits WHERE archivedAt IS NULL ORDER BY createdAt DESC")
+    fun observeAll(): Flow<List<HabitEntity>>
 
     @Query("SELECT COUNT(*) FROM habit_ticks WHERE habitId = :habitId")
     suspend fun tickCount(habitId: String): Int
